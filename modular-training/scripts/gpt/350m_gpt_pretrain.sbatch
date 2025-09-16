@@ -2,13 +2,13 @@
 #SBATCH -A m4410_g
 #SBATCH -C gpu
 #SBATCH -q regular
-#SBATCH -t 42:00:00
-#SBATCH --nodes=16
+#SBATCH -t 12:00:00
+#SBATCH --nodes=8
 #SBATCH --ntasks-per-node=1
 #SBATCH --gres=gpu:4
 #SBATCH --gpus-per-task=4
 #SBATCH --gpu-bind=none
-#SBATCH -c 16
+#SBATCH -c 32
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --mail-user=nankaicslk@gmail.com
 
@@ -39,6 +39,7 @@ echo "Master Address: $MASTER_ADDR"
 echo "Master Port: $MASTER_PORT"
 
 export NVIDIA_PYTORCH_VERSION=24.12
+export TMPDIR=/pscratch/sd/k/klhhhhh/tmp
 
 srun --ntasks=$SLURM_NTASKS hostname
 sleep 5
@@ -50,5 +51,5 @@ export NCCL_SOCKET_IFNAME=^docker0,lo
 export CUDA_LAUNCH_BLOCKING=1
 export NCCL_ASYNC_ERROR_HANDLING=1
 
-srun --export=ALL,MASTER_ADDR=$MASTER_ADDR,MASTER_PORT=$MASTER_PORT,NVIDIA_PYTORCH_VERSION=$NVIDIA_PYTORCH_VERSION \
+srun --export=ALL,MASTER_ADDR=$MASTER_ADDR,MASTER_PORT=$MASTER_PORT,NVIDIA_PYTORCH_VERSION=$NVIDIA_PYTORCH_VERSION,TMPDIR=$TMPDIR \
      bash /global/homes/k/klhhhhh/NeMo-modular-training/modular-training/scripts/gpt/350m_gpt_pretrain.sh

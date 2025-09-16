@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source /pscratch/sd/k/klhhhhh/envs/nemo/bin/activate
-bash /global/homes/k/klhhhhh/NeMo-modular-training/modular-training/scripts/gpt/export_package.sh
+source /global/homes/k/klhhhhh/NeMo-modular-training/modular-training/scripts/gpt/export_package.sh
 
 torchrun \
     --nnodes=8 \

@@ -2,13 +2,14 @@
 source /pscratch/sd/k/klhhhhh/envs/nemo/bin/activate
 bash /global/homes/k/klhhhhh/NeMo-modular-training/modular-training/scripts/gpt/export_package.sh
 
+export WANDB_API_KEY=54c49dff7abb6ed19894a8aaec8b305d316f0072
 export HF_HOME=/pscratch/sd/k/klhhhhh/hf_cache_lm_train
 export HF_DATASETS_CACHE=$HF_HOME/datasets
 export TRANSFORMERS_CACHE=$HF_HOME/models
 
 torchrun \
-    --nnodes=1 \
-    --nproc_per_node=1 \
+    --nnodes=8 \
+    --nproc_per_node=4 \
     --master_addr $MASTER_ADDR \
     --master_port $MASTER_PORT \
     --rdzv_id=gpt_124m \
@@ -17,11 +18,11 @@ torchrun \
     /global/homes/k/klhhhhh/NeMo-modular-training/examples/nlp/language_modeling/megatron_gpt_pretraining.py  \
     --config-path=/global/homes/k/klhhhhh/NeMo-modular-training/examples/nlp/language_modeling/conf \
     --config-name=megatron_gpt_config \
-    trainer.devices=1 \
-    trainer.num_nodes=1 \
+    trainer.devices=4 \
+    trainer.num_nodes=8 \
     trainer.max_epochs=null \
-    trainer.max_steps=1000 \
-    trainer.val_check_interval=300 \
+    trainer.max_steps=1143 \
+    trainer.val_check_interval=1143 \
     trainer.log_every_n_steps=25 \
     trainer.limit_val_batches=50 \
     trainer.limit_test_batches=50 \
@@ -29,9 +30,9 @@ torchrun \
     trainer.precision=16 \
     model.transformer_engine=True \
     model.megatron_amp_O2=False \
-    model.micro_batch_size=28 \
-    model.global_batch_size=28 \
-    model.tensor_model_parallel_size=1 \
+    model.micro_batch_size=112\
+    model.global_batch_size=896 \
+    model.tensor_model_parallel_size=4 \
     model.pipeline_model_parallel_size=1 \
     model.max_position_embeddings=1024 \
     model.encoder_seq_length=1024 \
@@ -57,9 +58,12 @@ torchrun \
     model.optim.sched.constant_steps=80000 \
     model.optim.sched.min_lr=6e-5 \
     exp_manager.resume_if_exists=True \
+    exp_manager.create_wandb_logger=True \
+    exp_manager.wandb_logger_kwargs.project="gpt124m_compare" \
+    exp_manager.wandb_logger_kwargs.name="run_dp_tp_$SLURM_JOB_ID" \
     exp_manager.resume_ignore_no_checkpoint=True \
     exp_manager.create_checkpoint_callback=True \
-    exp_manager.checkpoint_callback_params.dirpath=/pscratch/sd/k/klhhhhh/checkpoints/nemo/test/gpt1 \
+    exp_manager.checkpoint_callback_params.dirpath=/pscratch/sd/k/klhhhhh/checkpoints/nemo/test/tp_dp \
     exp_manager.checkpoint_callback_params.monitor=val_loss \
     exp_manager.checkpoint_callback_params.save_top_k=3 \
     exp_manager.checkpoint_callback_params.mode=min \
